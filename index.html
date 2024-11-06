@@ -1,0 +1,116 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Bastionamiento del arranque de un sistema Debian</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="docs"
+                  title="Bastionamiento del arranque de un sistema Debian"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Introducción y preparación del proyecto" duration="0">
+        <p><strong>Realizado por:</strong> Alejandro Seoane Martínez<br><strong>Asigantura:</strong> Bastionado de redes y sistemas<br><strong>Curso:</strong> 2024/25<br><strong>Grado:</strong> G.E.C.E.G.S.</p>
+<p>Configurar un arranque seguro en Debian es fundamental para mejorar la seguridad del propio sistema operativo. Esto nos protegerá contra modificaciones no autorizadas en el firmware y los cargadores de arranque, lo que es importante para mantener la integridad del sistema.<br> Con esto conseguiremos garantizar un entorno de ejecución seguro desde el inicio, lo que minimiza los riesgos asociados a ciberataques.<br> También garantizaremos que solo se carguen y ejecuten componentes de software firmados y confiables, evitando que se pueda ejecutar código malicioso en el arranque del dispositivo.</p>
+<p class="image-container"><img alt="Portada" src="img\\9e8450583f2fa942.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Ocultación del arranque" duration="0">
+        <p>Para ocultar el menú de arranque (GRUB) seguiremos los siguientes pasos:</p>
+<ul>
+<li>Tendremos que tener en cuenta que muchas configuraciones habrá que hacerlas con permisos de superusuario.</li>
+</ul>
+<pre><code language="language-bash" class="language-bash">sudo nano /etc/default/grub
+</code></pre>
+<p class="image-container"><img alt="image2" src="img\\e371572e0cfe3f08.png"></p>
+<p>Buscaremos las líneas GRUB_TIMEOUT y GRUB_TIMEOUT_STYLE. Si alguna de las 2 no están las tendremos que añadir y les pondremos el valor 0 a las 2.</p>
+<p class="image-container"><img alt="image3" src="img\\944c62d309284006.png"></p>
+<p>Una vez acabado le daremos a Ctrl+O para guardar el archivo y actualizaremos el grub con el siguiente comando:</p>
+<pre><code language="language-bash" class="language-bash">sudo update-grub
+</code></pre>
+<p>Y nos saldrá lo siguiente: <img alt="image4" src="img\\f927a2c71a89c2a2.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Contraseña de arranque" duration="0">
+        <p>Lo primero que tendremos que hacer es generar una contraseña encriptada. Esto lo conseguiremos con el comando:</p>
+<pre><code language="language-bash" class="language-bash">grub-mkpasswd-pbkdf2
+</code></pre>
+<p>Nos pedirá la contraseña para poder encriptarla.</p>
+<p class="image-container"><img alt="alt text" src="img\\ffaf67c69c005797.png"></p>
+<p>Una vez tenemos la contraseña encriptada la copiaremos y abriremos el siguiente archivo &#34;40_custom&#34;:</p>
+<pre><code language="language-bash" class="language-bash">sudo nano /etc/grub.d/40_custom
+</code></pre>
+<p>Al final del documento añadiremos las siguientes líneas con nuestros datos:</p>
+<pre><code>set superusers=&#34;nombre-usuario&#34;
+password_pbkdf2 nombre-usuario hash-password
+</code></pre>
+<p class="image-container"><img alt="alt text" src="img\\c717b458f05eb4fb.png"></p>
+<p>Por último actualizaremos de nuevo el grub:</p>
+<pre><code language="language-bash" class="language-bash">sudo update-grub
+</code></pre>
+<p class="image-container"><img alt="alt text" src="img\\b0ff4ee4e6eff5c7.png"></p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Copia de seguridad" duration="0">
+        <p>Para la copia de seguridad será un proceso fácil. Primero tendremos que crear la carpeta donde queremos hacer la copia de seguridad del GRUB:</p>
+<pre><code language="language-bash" class="language-bash">mkdir /home/alejandro/backup
+</code></pre>
+<p>Una vez creada la carpeta copiaremos el archivo de configuración que crea el GRUB:</p>
+<pre><code language="language-bash" class="language-bash">sudo cp /boot/grub/grub.cfg /home/alejandro/backup/
+</code></pre>
+<p class="image-container"><img alt="alt text" src="img\\941fa83f81bbfe4d.png"></p>
+<p>Podríamos ver el contenido de la misma. <img alt="alt text" src="img\\36bda4ca636c7989.png"> Ya habríamos hecho la copia de seguridad. Es importante recalcar que esta copia de seguridad habría que tenerla cifrada y protegida como pudiese ser en un disco externo cifrado.</p>
+<p>Si ocurriese cualquier problema con el GRUB, podríamos volcar el archivo backup que hemos copiado para poder recuperar la configuración.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Otras opciones de seguridad" duration="0">
+        <p>Como hemos mencionado en el apartado anterior lo suyo sería tenerlo cifrado de alguna manera para darle un nivel más en cuanto a seguridad.</p>
+<p>Hemos escogido la herramienta <strong>gocryptfs</strong> la cuál nos permitirá realizar acciones de encriptamiento.</p>
+<p>Lo primero de todo sería instalar la herramienta para ello ejecutaremos en la consola:</p>
+<pre><code language="language-bash" class="language-bash">sudo apt-get install gocryptfs
+</code></pre>
+<p>Procederemos a crear la encriptación de la carpeta que hemos indicado anteriormente donde íbamos a guardar el backup.</p>
+<pre><code language="language-bash" class="language-bash">gocryptfs -init /home/alejandro/backup
+</code></pre>
+<p>Nos pedirá una contraseña para poder descifrarlo después si queremos.</p>
+<p class="image-container"><img alt="alt text" src="img\\a337f3701f5a54c7.png"></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>

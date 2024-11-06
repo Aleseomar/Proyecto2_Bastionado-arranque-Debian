@@ -1,0 +1,24 @@
+{
+  "environment": "web",
+  "format": "html",
+  "prefix": "https://storage.googleapis.com",
+  "mainga": "UA-49880327-14",
+  "updated": "2024-11-06T23:26:56+01:00",
+  "id": "docs",
+  "duration": 0,
+  "title": "Bastionamiento del arranque de un sistema Debian",
+  "summary": "Proyecto2",
+  "source": "codelab.md",
+  "theme": "",
+  "status": [
+    "published"
+  ],
+  "category": [
+    "codelab",
+    "markdown"
+  ],
+  "tags": [
+    "web"
+  ],
+  "url": "docs"
+}
